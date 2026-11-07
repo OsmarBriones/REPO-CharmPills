@@ -1,0 +1,9 @@
+{
+    "name":  "CharmPills",
+    "version_number":  "1.0.0",
+    "website_url":  "https://github.com/OsmarBriones/REPO-CharmPills",
+    "description":  "Numbness: incoming damage is cut in half. Needs Pockets and CharmCore. Everyone in the lobby needs it.",
+    "dependencies":  [
+                         "BepInEx-BepInExPack-5.4.2304"
+                     ]
+}
