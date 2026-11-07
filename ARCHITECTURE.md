@@ -50,3 +50,12 @@ Provided by CharmCore: the `Debug.DebugMode` setting (off by default) places the
 - **Minimum multiplier 0.1:** full immunity is not offered.
 - **`MinimumHit`:** extra tunable so tiny hits, if the host wants, do not eat the valuable.
 - **Local only:** the hook runs on the damaged player's own machine, so no network message is needed.
+
+## Runtime hygiene
+
+- **References and level state:** nothing needed. `Numbness` holds only the charm; no per-level state and no static game objects.
+- **Per-frame work:** the hurt handler exits first when the charm is inactive or the hit was cancelled; it allocates nothing otherwise (the damage maths is pure integer/float work). There is no `Update`.
+- **Debug logs:** fixed. Both `LogDebug` lines in the hurt handler are now guarded with `if (charm.DebugMode)`.
+- **Changes to the game:** nothing needed. Only the damage of the current hit is changed, which is the effect itself.
+- **Static game objects and Find calls:** none.
+- Known limit outside this mod: while the charm is active, CharmCore's `IsActive` and `CharmSetting.Value` build their host-setting key strings on each call; that is CharmCore's code and was left alone.

@@ -43,7 +43,10 @@ namespace CharmPills
 			int after = DamageReduction.Reduce(before, charm.DamageMultiplier.Value);
 			if (after >= before)
 			{
-				charm.LogDebug($"Numbness: hit of {before} left as it was");
+				if (charm.DebugMode)
+				{
+					charm.LogDebug($"Numbness: hit of {before} left as it was");
+				}
 				return;
 			}
 
@@ -51,7 +54,10 @@ namespace CharmPills
 			if (charm.TryUse())
 			{
 				context.Damage = after;
-				charm.LogDebug($"Numbness: hit of {before} reduced to {after} (x{charm.DamageMultiplier.Value:0.##})");
+				if (charm.DebugMode)
+				{
+					charm.LogDebug($"Numbness: hit of {before} reduced to {after} (x{charm.DamageMultiplier.Value:0.##})");
+				}
 			}
 		}
 	}
