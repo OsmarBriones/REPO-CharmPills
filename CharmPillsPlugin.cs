@@ -23,10 +23,10 @@ namespace CharmPills
 			this.gameObject.transform.parent = null;
 			this.gameObject.hideFlags = HideFlags.HideAndDontSave;
 
-			// Registering binds Enabled, WearPercent, CooldownSeconds and the Debug section (DebugMode) in this mod's config file.
+			// Registering binds Enabled, WearPercent, the charm's own settings and the Debug section (DebugMode) in this mod's config file.
 			PillsCharm charm = new PillsCharm();
 			CharmsApi.Register(charm, Config);
-			this.gameObject.AddComponent<Numbness>().Charm = charm;
+			Numbness.Register(charm);
 
 			Logger.LogInfo($"{PluginName} {PluginVersion} loaded!");
 		}

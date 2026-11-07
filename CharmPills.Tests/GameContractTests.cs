@@ -28,10 +28,16 @@ public class GameContractTests
 	// ---- Members we read or write ----
 
 	[TestMethod]
+	public void PlayerHealth_HasTheHurtMethodTheHookRelaysOn()
+	{
+		// Numbness changes the damage through CharmCore's hook on PlayerHealth.Hurt(damage, savingGrace, enemyIndex, hurtByHeal).
+		RequireMethod("PlayerHealth", "Hurt", 4);
+	}
+
+	[TestMethod]
 	public void Valuable_HasTheValueFields()
 	{
-		// TODO: add one RequireField / RequireMethod line for every game member this charm's effect reads, writes or patches,
-		// so a game update that renames or removes one fails here with a clear message.
+		// Wear is applied by CharmCore to the pocketed valuable's value.
 		RequireField("ValuableObject", "dollarValueCurrent");
 	}
 

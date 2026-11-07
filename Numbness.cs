@@ -1,32 +1,58 @@
-using UnityEngine;
+using CharmCore.Api;
+using CharmPills.Domain;
 
 namespace CharmPills
 {
 	/// <summary>
-	/// Numbness: incoming damage is cut in half.
-	/// TODO: implement the power. Rules every charm follows:
-	/// - Only act while <c>Charm.IsActive</c> (the valuable is in the local player's pocket and everything is on).
-	/// - Call <c>Charm.TryUse()</c> at the moment the power triggers and apply the effect only when it returns true:
-	///   that starts the cooldown and wears the valuable. For wear over time use <c>Charm.TryUse(percent)</c> or <c>Charm.Wear(percent)</c>.
-	/// - Write debug detail with <c>Charm.LogDebug(...)</c>, never with the plugin logger (a test enforces it).
+	/// Numbness: while the Pills are in the pocket, damage to the owner is multiplied by <c>DamageMultiplier</c>.
+	/// CharmCore owns the hook on <c>PlayerHealth.Hurt</c> and only offers hits the game would really apply, so this
+	/// class just registers one handler (damage-reduction slot, priority 20) and wears the valuable when it softened a hit.
 	/// </summary>
-	internal sealed class Numbness : MonoBehaviour
+	internal sealed class Numbness
 	{
-		internal PillsCharm Charm { get; set; } = null!;
+		/// <summary>The "damage reduction" priority suggested by <see cref="CharmsApi.OnPlayerHurting"/>.</summary>
+		internal const int Priority = 20;
 
-		private void Update()
+		private readonly PillsCharm charm;
+
+		private Numbness(PillsCharm charm)
 		{
-			if (Charm == null || !Charm.IsActive)
+			this.charm = charm;
+		}
+
+		/// <summary>Registers the hurt handler once; call it after <see cref="CharmsApi.Register"/>.</summary>
+		internal static void Register(PillsCharm charm)
+		{
+			Numbness numbness = new Numbness(charm);
+			CharmsApi.OnPlayerHurting(numbness.OnHurting, Priority);
+		}
+
+		private void OnHurting(PlayerHurtContext context)
+		{
+			if (!charm.IsActive || context.Cancel)
 			{
 				return;
 			}
 
-			// TODO: detect the moment the power should trigger, then:
-			// if (Charm.TryUse())
-			// {
-			//     ... apply the effect ...
-			//     Charm.LogDebug("Numbness triggered");
-			// }
+			int before = context.Damage;
+			if (!DamageReduction.IsWorthReducing(before, charm.MinimumHit.Value))
+			{
+				return;
+			}
+
+			int after = DamageReduction.Reduce(before, charm.DamageMultiplier.Value);
+			if (after >= before)
+			{
+				charm.LogDebug($"Numbness: hit of {before} left as it was");
+				return;
+			}
+
+			// No cooldown, so TryUse always succeeds while the charm is active; it also applies the wear.
+			if (charm.TryUse())
+			{
+				context.Damage = after;
+				charm.LogDebug($"Numbness: hit of {before} reduced to {after} (x{charm.DamageMultiplier.Value:0.##})");
+			}
 		}
 	}
 }
